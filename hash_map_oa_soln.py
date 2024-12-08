@@ -10,24 +10,12 @@ from a6_include import (DynamicArray, HashEntry, hash_function_1, hash_function_
 
 class HashMap:
     def __init__(self, capacity: int, function) -> None:
-        """
-        Initialize new HashMap that uses quadratic probing for collision resolution.
-        """
         self._buckets = DynamicArray()
         self._capacity = self._next_prime(capacity)
         for _ in range(self._capacity):
             self._buckets.append(None)
         self._hash_function = function
         self._size = 0
-
-    def __str__(self) -> str:
-        """
-        Override string method to provide more readable output.
-        """
-        out = ''
-        for i in range(self._buckets.length()):
-            out += str(i) + ': ' + str(self._buckets[i]) + '\n'
-        return out
 
     def _next_prime(self, capacity: int) -> int:
         if capacity % 2 == 0:
@@ -55,6 +43,9 @@ class HashMap:
     def get_capacity(self) -> int:
         return self._capacity
 
+    def table_load(self) -> float:
+        return self._size / self._capacity
+
     def put(self, key: str, value: object) -> None:
         if self.table_load() >= 0.5:
             self.resize_table(self._capacity * 2)
@@ -62,13 +53,13 @@ class HashMap:
         i = 0
         while True:
             current_index = (index + i ** 2) % self._capacity
-            current_entry = self._buckets[current_index]
-            if current_entry is None or current_entry.is_tombstone:
+            entry = self._buckets[current_index]
+            if entry is None or entry.is_tombstone:
                 self._buckets[current_index] = HashEntry(key, value)
                 self._size += 1
                 return
-            elif current_entry.key == key:
-                current_entry.value = value
+            elif entry.key == key:
+                entry.value = value
                 return
             i += 1
 
@@ -86,9 +77,6 @@ class HashMap:
             if entry is not None and not entry.is_tombstone:
                 self.put(entry.key, entry.value)
 
-    def table_load(self) -> float:
-        return self._size / self._capacity
-
     def empty_buckets(self) -> int:
         count = 0
         for i in range(self._buckets.length()):
@@ -101,11 +89,11 @@ class HashMap:
         i = 0
         while True:
             current_index = (index + i ** 2) % self._capacity
-            current_entry = self._buckets[current_index]
-            if current_entry is None:
+            entry = self._buckets[current_index]
+            if entry is None:
                 return None
-            if current_entry.key == key and not current_entry.is_tombstone:
-                return current_entry.value
+            if entry.key == key and not entry.is_tombstone:
+                return entry.value
             i += 1
 
     def contains_key(self, key: str) -> bool:
@@ -113,10 +101,10 @@ class HashMap:
         i = 0
         while True:
             current_index = (index + i ** 2) % self._capacity
-            current_entry = self._buckets[current_index]
-            if current_entry is None:
+            entry = self._buckets[current_index]
+            if entry is None:
                 return False
-            if current_entry.key == key and not current_entry.is_tombstone:
+            if entry.key == key and not entry.is_tombstone:
                 return True
             i += 1
 
@@ -125,11 +113,11 @@ class HashMap:
         i = 0
         while True:
             current_index = (index + i ** 2) % self._capacity
-            current_entry = self._buckets[current_index]
-            if current_entry is None:
+            entry = self._buckets[current_index]
+            if entry is None:
                 return
-            if current_entry.key == key and not current_entry.is_tombstone:
-                current_entry.is_tombstone = True
+            if entry.key == key and not entry.is_tombstone:
+                entry.is_tombstone = True
                 self._size -= 1
                 return
             i += 1
